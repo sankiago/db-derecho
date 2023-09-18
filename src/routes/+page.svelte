@@ -1,5 +1,14 @@
 <script>
-    import Label from "../lib/Label.svelte";
+    import Selector from "../lib/Selector.svelte";
 </script>
 
-<Label></Label>
+<style>
+    div{
+        width: 200px;
+        height: min-content;
+    }
+</style>
+
+<div>
+    <Selector></Selector>
+</div>
