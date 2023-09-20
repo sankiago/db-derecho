@@ -1,4 +1,5 @@
 <script>
+    import { createEventDispatcher } from "svelte";
     const stringToColour = (str) => {
         let hash = 0;
         str.split("").forEach((char) => {
@@ -39,25 +40,55 @@
         // pad each with zeros and return
         return "#" + padZero(r) + padZero(g) + padZero(b);
     }
+    export let id = NaN;
     export let deletable = false;
     export let text = "Nueva categoría";
     let backgroundColor = stringToColour(text);
     let textColor = invertColor(backgroundColor, true);
+
+    const dispatch = createEventDispatcher();
+
+    function deleteHandler() {
+        dispatch("delete", { id, text });
+    }
+    function darkenText() {
+        textColor = invertColor(textColor, true);
+    }
+    function lightenText() {
+        textColor = invertColor(textColor, true);
+    }
 </script>
 
-<div style="--bg-color: {backgroundColor}; --text-color: {textColor}">
+<div on:click style="--bg-color: {backgroundColor}; --text-color: {textColor}">
     {text}
-    {#if deletable}
-    <svg
-        width="7"
-        height="7"
-        viewBox="0 0 7 7"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path d="M6.15173 0.848328L0.848433 6.15163" stroke={textColor} />
-        <path d="M6.15173 6.15167L0.848433 0.848371" stroke={textColor} />
-    </svg>
+    {#if deletable == true}
+        <span
+            on:click={deleteHandler}
+            on:mousedown={darkenText}
+            on:mouseup={lightenText}
+            on:keydown={function () {
+                deleteHandler();
+            }}
+            role="button"
+            tabindex="0"
+        >
+            <svg
+                width="7"
+                height="7"
+                viewBox="0 0 7 7"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M6.15173 0.848328L0.848433 6.15163"
+                    stroke={textColor}
+                />
+                <path
+                    d="M6.15173 6.15167L0.848433 0.848371"
+                    stroke={textColor}
+                />
+            </svg>
+        </span>
     {/if}
 </div>
 
@@ -67,7 +98,8 @@
         justify-content: space-around;
         align-items: center;
         padding-block: 3px;
-        padding-inline: 4px;
+        padding-inline: 6px;
+        min-height: 16px;
         height: min-content;
         font-size: 14px;
         /* margin-right: 10px;
@@ -80,11 +112,10 @@
         width: max-content;
         max-width: 97%;
         border-radius: 5px;
+        gap: 5px;
     }
 
-    svg {
-        margin-left: 5px;
-    }
+    /* svg:active > path{
+        stroke: rgb(182, 182, 182);
+    } */
 </style>
-
-
