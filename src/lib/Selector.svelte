@@ -2,20 +2,25 @@
     import Label from "./Label.svelte";
     import { clickOutside } from "./clickOutside.js";
     import { createEventDispatcher } from "svelte";
+    
+    //export let = unique;
+    const dispatch = createEventDispatcher();
+    let selected = false;
 
-    //export let unique = true
+
     export let selectedCategories = [
         {
             id: 1,
-            name: "CEDO",
+            name: ,
         },
         {
             id: 2,
             name: "Sistemas operativos",
         },
     ];
-    let selected = false;
-    const dispatch = createEventDispatcher();
+    export let toSelect = {
+        1: "CEDO"
+    }
     export let toSelect = [
         {
             id: 3,
@@ -34,7 +39,6 @@
 
     function deleteHandler(event) {
         const id = event.detail.id;
-        console.log(`deleting ${id}`);
         const deletedElement = selectedCategories.find(
             (category) => category.id == id
         );
@@ -60,8 +64,7 @@
     function handleInputLoad(inputNode) {
         inputNode.focus();
         inputNode.addEventListener("focusout", () => {
-            if(!editing)
-                inputNode.focus();
+            if (!editing) inputNode.focus();
         });
     }
 
@@ -83,19 +86,37 @@
     let editingId = NaN;
 
     function handleClickEditButton(id) {
-        console.log('editar?');
-        editing = true;
-        editingId = id
+        editing = !editing;
+        editingId = id;
     }
 
-    function hanldeEditButtonClickOutside(){
-        editing=false
+    function hanldeEditButtonClickOutside() {
+        editing = false;
     }
 
-    function editCategory(id, newName) {
-        dispatch("editCategory", { field, id, newName });
-    }
+    function editInputHanlder(input) {
+        const currentCategoryId =
+            input.parentElement.attributes.categoryid.value;
+        input.value = toSelect.find(
+            (category) => category.id == currentCategoryId
+        ).name;
+        input.focus();
 
+        function editName() {
+            const categoryArrayIndex = toSelect.findIndex(
+                (category) => category.id == currentCategoryId
+            );
+            toSelect[categoryArrayIndex].name = input.value;
+        }
+
+        input.addEventListener("focusout", editName);
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                editName();
+                editing = false;
+            }
+        });
+    }
 </script>
 
 <div
@@ -135,7 +156,10 @@
                         }}
                     />
                     <svg
-                        on:click={()=>{handleClickEditButton(id)}}
+                        categoryid={id}
+                        on:click={() => {
+                            handleClickEditButton(id);
+                        }}
                         role="graphics-symbol"
                         viewBox="0 0 13 3"
                         class="dots"
@@ -151,8 +175,13 @@
                         >
                     </svg>
                     {#if editing && editingId == id}
-                        <div use:clickOutside on:click_outside={hanldeEditButtonClickOutside} class="editorWrapper">
-                            <input type="text" />
+                        <div
+                            use:clickOutside
+                            on:click_outside={hanldeEditButtonClickOutside}
+                            class="editorWrapper"
+                            categoryid={id}
+                        >
+                            <input type="text" use:editInputHanlder />
                             <div class="deleteWrapper">
                                 <svg
                                     role="graphics-symbol"
@@ -266,12 +295,13 @@
         background-color: rgba(15, 15, 15, 0.1);
     }
 
-    .editorWrapper{
+    .editorWrapper {
         position: absolute;
         top: 90px;
         right: -64px;
         background-color: white;
-        box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px, rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
+        box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px,
+            rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
         display: flex;
         flex-direction: column;
         padding: 12px;
@@ -281,24 +311,23 @@
         right: -84%;
     }
 
-    .editorWrapper > input{
+    .editorWrapper > input {
         border-radius: 2px;
         border: #dfdedd solid 1px;
         background-color: #f7f6f5;
         font-size: 14px;
     }
 
-    .editorWrapper > input:focus{
+    .editorWrapper > input:focus {
         border-color: #7db4e9;
         outline: solid;
         outline-color: #b2d4f5;
     }
 
-    .deleteWrapper{
+    .deleteWrapper {
         display: flex;
         justify-content: flex-start;
-        gap:5px;
+        gap: 5px;
         font-size: 14px;
-        
     }
 </style>
